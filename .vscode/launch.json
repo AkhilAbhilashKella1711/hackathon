@@ -1,0 +1,21 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Python Debugger: Worker",
+			"type": "debugpy",
+			"request": "launch",
+			"envFile": "${workspaceFolder}/.env.development",
+			"console": "integratedTerminal",
+			"module": "src.run_worker"
+		},
+		{
+			"name": "Python Debugger: FastAPI Server",
+			"type": "debugpy",
+			"request": "launch",
+			"envFile": "${workspaceFolder}/.env.development",
+			"console": "integratedTerminal",
+			"module": "server.main"
+		}
+	]
+}
