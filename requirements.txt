@@ -1,0 +1,14 @@
+fastapi==0.111.1
+ruff==0.5.3
+motor==3.5.1
+pytz==2024.1
+pyright==1.1.372
+requests==2.32.3
+pymongo==4.8.0
+bs4==0.0.2
+temporalio==1.10.0
+azure-storage-blob==12.19.0
+litellm==1.59.10
+azure-storage-blob==12.19.0
+redis==5.2.1
+datetime

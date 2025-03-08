@@ -1,0 +1,91 @@
+# .gitignore
+
+# Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Airflow files
+logs/
+scheduler/
+dags/__pycache__/
+
+# Docker files
+.dockerignore
+.docker/
+
+# Virtual environment
+venv/
+*.venv
+.env
+.env.development
+
+
+
+# IDEs and editors
+.idea/
+*.swp
+*.swo
+*.swn
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+#temporal
+temporal-local.db
+*.db
+
+.history
+
+.env.local
+_temp/
+
+# Chatklot's .gitignore contents
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+chatklot/node_modules
+chatklot/.pnp
+chatklot/.pnp.js
+
+# testing
+chatklot/coverage
+
+# next.js
+chatklot/.next/
+chatklot/out/
+
+# production
+chatklot/build
+
+# misc
+chatklot/*.pem
+
+# debug
+chatklot/npm-debug.log*
+chatklot/yarn-debug.log*
+chatklot/yarn-error.log*
+
+# local env files
+chatklot/.env*.local
+
+# vercel
+chatklot/.vercel
+
+# typescript
+chatklot/*.tsbuildinfo
+chatklot/next-env.d.ts
+
+_dummy-web-api/node_modules
+Postman.app
+
+
+oss/
+connectors/*/routes.py
+.codegpt

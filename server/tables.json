@@ -1,0 +1,84 @@
+{
+    "employees" : {
+        "table_name" : "Employee Details",
+        "columns": [ 
+    {
+      "column_name": "Email Address",
+      "column_type": "String",
+      "column_id": "emailAddress",
+      "array_type": null,
+      "default_value": "",
+      "object_fields": null,
+      "triggers": null
+    },
+    {
+      "column_name": "Phone Number",
+      "column_type": "String",
+      "column_id": "phone_number",
+      "array_type": null,
+      "default_value": "",
+      "object_fields": null,
+      "triggers": null
+    },
+    {
+      "column_name": "User Followed Up",
+      "column_type": "Boolean",
+      "column_id": "user_followed_up",
+      "array_type": null,
+      "default_value": false,
+      "object_fields": null,
+      "triggers": []
+    },
+    {
+      "column_name": "Task Status",
+      "column_type": "String",
+      "column_id": "task_status",
+      "array_type": null,
+      "default_value": "",
+      "object_fields": null,
+      "triggers": null
+    },
+    {
+      "column_name": "Task Descriptive Goal for Call",
+      "column_type": "String",
+      "column_id": "task_goal",
+      "array_type": null,
+      "default_value": "",
+      "object_fields": null,
+      "triggers": null
+    }
+  ]
+    },
+    "history" : {
+        "table_name" : "History",
+        "columns": [ 
+    {
+      "column_name": "Email Address",
+      "column_type": "String",
+      "column_id": "emailAddress",
+      "array_type": null,
+      "default_value": "",
+      "object_fields": null,
+      "triggers": null
+    },
+    {
+      "column_name": "Call Summary",
+      "column_type": "String",
+      "column_id": "call_summary",
+      "array_type": null,
+      "default_value": "",
+      "object_fields": null,
+      "triggers": null
+    },
+    {
+      "column_name": "Time Stamp",
+      "column_type": "Boolean",
+      "column_id": "timestamp",
+      "array_type": null,
+      "default_value": false,
+      "object_fields": null,
+      "triggers": []
+    }
+  ]
+    }
+}
