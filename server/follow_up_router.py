@@ -267,7 +267,7 @@ async def update_jira_details_table(user_id: str):
             email = jira_config_data['email']
             api_token = jira_config_data['api_token']
         for user_table in users_tables:
-            if user_table['table_name'] == 'Employee Details':
+            if user_table['table_name'] == 'Team Members':
                 table_id = user_table['table_id']
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
@@ -319,7 +319,7 @@ async def new_record_insertion(user_id: str, inserted_id: str):
     try:
         users = await users_collection.find_one({'user_id': user_id})
         for table in users['table_details']:
-            if table['table_name'] == 'Employee Details':
+            if table['table_name'] == 'Team Members':
                 table_id = table['table_id']
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
@@ -436,7 +436,7 @@ async def schedule_bland_calls(bland_call_input: BlandCallInput):
         if user_details is None:
             raise HTTPException(status_code=404, detail='User Details not found')
         for table in user_details['table_details']:
-            if table['table_name'] == 'Employee Details':
+            if table['table_name'] == 'Team Members':
                 employee_table_id = table['table_id']
                 token = user_details['token']
                 async with httpx.AsyncClient() as client:
@@ -563,7 +563,7 @@ async def schedule_calls(user_id: str, n: int):
         if user_details is None:
             raise HTTPException(status_code=404, detail='User Details not found')
         for table in user_details['table_details']:
-            if table['table_name'] == 'Employee Details':
+            if table['table_name'] == 'Team Members':
                 employee_table_id = table['table_id']
                 token = user_details['token']
                 async with httpx.AsyncClient() as client:
@@ -728,7 +728,7 @@ async def find_user(conversation: ConversationContent):
         if user_details is None:
             raise HTTPException(status_code=404, detail='User Details not found')
         for table in user_details['table_details']:
-            if table['table_name'] == 'Employee Details':
+            if table['table_name'] == 'Team Members':
                 table_id = table['table_id']
                 token = user_details['token']
                 async with httpx.AsyncClient() as client:
@@ -822,7 +822,7 @@ async def history_received(request: Request):
         history_table_id = None
         task_goal_of_user = None
         for table in user_details.get('table_details'):
-            if table['table_name'] == 'Employee Details':
+            if table['table_name'] == 'Team Members':
                 table_id = table.get('table_id')
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
@@ -1010,3 +1010,31 @@ async def find_users():
 #         )
 #     except Exception as e:
 #         raise HTTPException(status_code=500, detail=str(e))
+
+
+class HistoryInput(BaseModel):
+    email_id: str
+    projectID: str
+    table_id: str
+
+
+@router.post('/history/email')
+async def get_email_history(history_input: HistoryInput):
+    try:
+        email_id = history_input.email_id
+        projectID = history_input.projectID
+        table_id = history_input.table_id
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f'{env.klot_data_service_url}/storage/{projectID}/{table_id}?page=1&page_size=1000000',
+                headers={'x-server-key': env.web_server_secret},
+            )
+            response.raise_for_status()
+            users = response.json()
+            records = users.get('records')
+            history_records = [
+                record for record in records if record['emailAddress'] == email_id
+            ]
+            return history_records
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
