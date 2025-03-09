@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 import env
 
@@ -24,9 +25,19 @@ app.include_router(connector_router)
 app.include_router(conversation_router)
 app.include_router(follow_up_router)
 
+
 @app.get('/health_check')
 async def health_check():
     return {'message': 'Hey Devops dude! I am alive!'}
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],  # List of origins, adjust as needed
+    allow_credentials=True,
+    allow_methods=['*'],  # Allow any method
+    allow_headers=['*'],
+)
 
 
 if __name__ == '__main__':

@@ -1024,10 +1024,17 @@ async def get_email_history(history_input: HistoryInput):
         email_id = history_input.email_id
         projectID = history_input.projectID
         table_id = history_input.table_id
+        user = await users_collection.find_one({'projectId': projectID})
+        if user is None:
+            raise HTTPException(status_code=404, detail='User not found')
+        token = user['token']
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f'{env.klot_data_service_url}/storage/{projectID}/{table_id}?page=1&page_size=1000000',
-                headers={'x-server-key': env.web_server_secret},
+                headers={
+                    'x-server-key': env.web_server_secret,
+                    'Authorization': f'Bearer {token}',
+                },
             )
             response.raise_for_status()
             users = response.json()
