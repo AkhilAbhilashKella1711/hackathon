@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 
 import httpx
 import litellm
@@ -9,7 +8,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 import env as config
+from server.common.database.mongodb import client as mongodb
+from server.config.collections import collections
 
+users_collection = mongodb.db[collections.users]
 router = APIRouter()
 
 _headers = {
@@ -38,7 +40,7 @@ redis_client = redis.Redis(
 
 # Data Model for Chat Requests
 class ChatRequest(BaseModel):
-    session_id: str
+    # session_id: Optional[str] = None
     model_name: str  # Choose from LLM_MODELS (e.g., "claude", "gpt-4")
     message: str
 
@@ -59,15 +61,16 @@ def get_session(session_id):
 async def chat_with_llm(
     chat_request: ChatRequest,
 ) -> UnstructuredLiteLLMCompletionResponse:
-    session_id = chat_request.session_id
+    # session_id = chat_request.session_id
     model_name = chat_request.model_name.lower() or 'azure/gpt-4o'
     message = chat_request.message
 
     # Retrieve previous chat history
-    chat_history = get_session(session_id) or []
+    # chat_history = get_session(session_id) or []
 
     # Append user message to chat history
-    messages = chat_history if isinstance(chat_history, list) else []
+    # messages = chat_history if isinstance(chat_history, list) else []
+    messages = []
 
     # Append the new user message
     messages.append(
@@ -102,10 +105,10 @@ async def chat_with_llm(
         summarized_content = summary_response['choices'][0]['message']['content']
 
         # Append assistant response to chat history
-        chat_history.append({'role': 'assistant', 'content': summarized_content})
+        # chat_history.append({'role': 'assistant', 'content': summarized_content})
 
         # Save updated chat history
-        save_session(session_id, chat_history)
+        # save_session(session_id, chat_history)
 
         return UnstructuredLiteLLMCompletionResponse(
             response=response['choices'][0]['message']['content'],
@@ -123,13 +126,16 @@ class UserQueryDetails(BaseModel):
     user_query: str
 
 
-@router.post('/chat/{connector_id}')
+@router.post('/chat/{user_id}')
 async def query_on_jira(
-    connector_id: str,
+    user_id: str,
     user_query_details: UserQueryDetails,
-    session: Optional[str] = None,
 ):
     try:
+        user = await users_collection.find_one({'user_id': user_id})
+        if user is None:
+            raise HTTPException(status_code=404, detail='User not found')
+        connector_id = user.get('jira_connector_id')
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 url=f'{config.klot_data_service_url}/actions/jira/config/{connector_id}',
@@ -165,7 +171,6 @@ If the user is not asking to create a jira ticket, delete a ticket or find ticke
 Return only the string and nothing else, do not include any additional information or metadata.
             """
             chat_request = ChatRequest(
-                session_id=session or None,
                 model_name='azure/gpt-4o',
                 message=find_action,
             )
@@ -189,7 +194,7 @@ the details should be in the following format:
 Return only the stringified json and nothing else, do not include any additional information or metadata.
 """
                 chat_request = ChatRequest(
-                    session_id=session or None,
+                    # session_id=session or None,
                     model_name='azure/gpt-4o',
                     message=jira_data,
                 )
@@ -260,7 +265,7 @@ ticket_project_key: the project key of the ticket to be deleted
 Return only the stringified json and nothing else, do not include any additional information or metadata.
 """
                     chat_request = ChatRequest(
-                        session_id=session or None,
+                        # session_id=session or None,
                         model_name='azure/gpt-4o',
                         message=prompt,
                     )
@@ -300,7 +305,7 @@ Return only the stringified json and nothing else, do not include any additional
         Ensure field names are correct as per Jira's schema.
         Return only the JQL query as a string and nothing else, do not include any additional information or metadata. do  not even mention jql , just return the JQL query generated as string"""
                     chat_request = ChatRequest(
-                        session_id=session or None,
+                        # session_id=session or None,
                         model_name='azure/gpt-4o',
                         message=message_check,
                     )

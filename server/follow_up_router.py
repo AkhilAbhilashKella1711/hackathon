@@ -33,14 +33,14 @@ class AgentflowDetails(BaseModel):
 
 
 class UserDetails(BaseModel):
-    jira_connector_id: Optional[str]
-    slack_connector_id: Optional[str]
-    voice_connector_id: Optional[str]
-    email_connector_id: Optional[str]
-    master_connector_id: Optional[str]
-    bland_connector_id: Optional[str]
-    table_details: Optional[list[TableDetails]]
-    agentflow_details: Optional[list[AgentflowDetails]]
+    jira_connector_id: Optional[str] = None
+    slack_connector_id: Optional[str] = None
+    voice_connector_id: Optional[str] = None
+    email_connector_id: Optional[str] = None
+    master_connector_id: Optional[str] = None
+    bland_connector_id: Optional[str] = None
+    table_details: Optional[list[TableDetails]] = None
+    agentflow_details: Optional[list[AgentflowDetails]] = None
     projectId: str
     user_id: str
     token: str
@@ -233,10 +233,71 @@ async def summarize_tickets(
 @router.post('/save/user/details')
 async def save_details(data: UserDetails):
     try:
+        data_for_update = {'user_id': data.user_id}
         user_details = await users_collection.find_one({'user_id': data.user_id})
         if user_details is not None:
+            if user_details['jira_connector_id'] != data.jira_connector_id:
+                data_for_update['jira_connector_id'] = (
+                    data.jira_connector_id
+                    if data.jira_connector_id is not None
+                    else user_details['jira_connector_id']
+                )
+            if user_details['projectId'] != data.projectId:
+                data_for_update['projectId'] = (
+                    data.projectId
+                    if data.projectId is not None
+                    else user_details['projectId']
+                )
+            if user_details['table_details'] != data.table_details:
+                data_for_update['table_details'] = (
+                    data.table_details
+                    if data.table_details is not None
+                    else user_details['table_details']
+                )
+            if user_details['agentflow_details'] != data.agentflow_details:
+                data_for_update['agentflow_details'] = (
+                    data.agentflow_details
+                    if data.agentflow_details is not None
+                    else user_details['agentflow_details']
+                )
+            if user_details['email_connector_id'] != data.email_connector_id:
+                data_for_update['email_connector_id'] = (
+                    data.email_connector_id
+                    if data.email_connector_id is not None
+                    else user_details['email_connector_id']
+                )
+            if user_details['slack_connector_id'] != data.slack_connector_id:
+                data_for_update['slack_connector_id'] = (
+                    data.slack_connector_id
+                    if data.slack_connector_id is not None
+                    else user_details['slack_connector_id']
+                )
+            if user_details['voice_connector_id'] != data.voice_connector_id:
+                data_for_update['voice_connector_id'] = (
+                    data.voice_connector_id
+                    if data.voice_connector_id is not None
+                    else user_details['voice_connector_id']
+                )
+            if user_details['master_connector_id'] != data.master_connector_id:
+                data_for_update['master_connector_id'] = (
+                    data.master_connector_id
+                    if data.master_connector_id is not None
+                    else user_details['master_connector_id']
+                )
+            if user_details['bland_connector_id'] != data.bland_connector_id:
+                data_for_update['bland_connector_id'] = (
+                    data.bland_connector_id
+                    if data.bland_connector_id is not None
+                    else user_details['bland_connector_id']
+                )
+            if user_details['token'] != data.token:
+                data_for_update['token'] = (
+                    data.token if data.token is not None else user_details['token']
+                )
+
+        if user_details is not None:
             await users_collection.update_one(
-                {'user_id': data.user_id}, {'$set': data.model_dump()}
+                {'user_id': data.user_id}, {'$set': data_for_update}
             )
         else:
             await users_collection.insert_one(data.model_dump())
@@ -415,7 +476,7 @@ async def make_call_using_bland(user_id: str, call_prompt: str, phone_number: st
         }
         async with httpx.AsyncClient() as client:
             response = await client.post(url=url, json=payload, headers=headers)
-            print('response', response)
+            print('response', response.text)
             response.raise_for_status()
             response_data = response.json()
     except Exception as e:
@@ -775,7 +836,7 @@ async def find_user(conversation: ConversationContent):
 async def history_received(request: Request):
     try:
         data = await request.json()
-        # print("data", data)
+        print('data', data)
         content = f"""
         based on the data {data}, find the value of user_id from the data, return the user_id as a string value, do not return anything else except the user_id, do not mention anything, just return the user_id value only
         """
@@ -838,10 +899,10 @@ async def history_received(request: Request):
                     for record in records:
                         phone_number = record['phone_number']
                         if (
-                            record['phone_number'] == f'+{phone_number}'
-                            or record['phone_number'] == f'{phone_number}'
+                            data['to'] == f'+{phone_number}'
+                            or data['to'] == f'{phone_number}'
                         ):
-                            print('record found', record['displayName'])
+                            print('record found', record)
                             email_address_of_user = record['emailAddress']
                             content = f"""
                             based on the data {data['summary']}, find if the user has any update on the task, if the task is mentioned completed then return "done" else return "in progress" value as a string, return only "done" or "in progress" value only as per the summary of call provided, do not return anything else except the "done" or "in progress" value only
